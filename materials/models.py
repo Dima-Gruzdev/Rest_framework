@@ -1,6 +1,6 @@
 from django.db import models
 
-from users.models import User
+from config import settings
 
 
 class Course(models.Model):
@@ -20,7 +20,7 @@ class Course(models.Model):
         help_text="Загрузите изображение",
     )
     owner = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="courses",
         verbose_name="Владелец курса",
@@ -60,7 +60,7 @@ class Lesson(models.Model):
         Course, on_delete=models.CASCADE, related_name="lessons", verbose_name="Курс"
     )
     owner = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="lessons",
         verbose_name="Владелец урока",
