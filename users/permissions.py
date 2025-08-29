@@ -31,3 +31,10 @@ class CanDeleteCourseOrLesson(permissions.BasePermission):
                 return False
             return obj.owner == request.user or request.user.is_staff
         return True
+
+class IsOwnerOrAdmin(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_staff:
+            return True
+        return obj == request.user
