@@ -18,6 +18,9 @@ from users.permissions import  IsOwnerOrModeratorOrAdmin, CanDeleteCourseOrLesso
 
 
 class CourseViewSet(ModelViewSet):
+    """ Вьюшка  Курсов , наследующегося от Моделвиевсет (создание, удаление,
+    редактирование и просмотра"""
+
     queryset = Course.objects.prefetch_related("lessons").all()
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -49,6 +52,7 @@ class CourseViewSet(ModelViewSet):
 
 
 class LessonCreateApiView(CreateAPIView):
+    """Создание уроков """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAdminUser]
@@ -57,6 +61,7 @@ class LessonCreateApiView(CreateAPIView):
         serializer.save(owner=self.request.user)
 
 class LessonListApiView(ListAPIView):
+    """Отображение уроков"""
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
@@ -70,24 +75,28 @@ class LessonListApiView(ListAPIView):
         return Lesson.objects.filter(owner=user)
 
 class LessonUpdateApiView(UpdateAPIView):
+    """Редактирование уроков"""
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrModeratorOrAdmin]
 
 
 class LessonDestroyApiView(DestroyAPIView):
+    """Удаление уроков"""
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAuthenticated, CanDeleteCourseOrLesson]
 
 
 class LessonRetrieveApiView(RetrieveAPIView):
+    """Детальный просмотр"""
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrModeratorOrAdmin]
 
 
 class SubscriptionAPIView(APIView):
+    """Подписка на курсы"""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):

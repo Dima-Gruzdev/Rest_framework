@@ -6,20 +6,22 @@ from materials.validators import validate_video_urls
 
 
 class LessonSerializer(ModelSerializer):
+    """Класс сериализатора  для вьюсета Уроков для отображения параметров"""
 
     class Meta:
         model = Lesson
         fields = "__all__"
         extra_kwargs = {
-            'video_url': {
-                'validators': [validate_video_urls]
-            }
+            'video_url': {'validators': [validate_video_urls]}
         }
 
 
 class CourseSerializer(ModelSerializer):
+    """Класс сериализатора  для вьюсета Курса для отображения параметров,
+    так же добавлено новое поле и оформление подписки"""
+
     count_lesson = serializers.SerializerMethodField()
-    lessons = LessonSerializer(source="lessons", many=True, read_only=True)
+    lessons = LessonSerializer(many=True, read_only=True)
 
     class Meta:
         model = Course
