@@ -4,13 +4,9 @@ from rest_framework.serializers import ValidationError
 
 
 def validate_video_urls(value):
-    youtube_regex = (
-        r'(https?://)?(www\.)?'
-        r'(youtube\.com|youtu\.be)/'
-        r'(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})'
-    )
-    if not re.match(youtube_regex, value):
-        raise ValidationError(
-            'Ссылка должна вести на YouTube'
-            'Ссылки на другие платформы запрещены.'
-        )
+    """Класс валидации проверки видео материала"""
+    if not value:
+        return
+    youtube_regex = r'(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+\?v=([^&]+)|youtu\.be/([^&?]+)'
+    if not re.match(youtube_regex, value.strip()):
+        raise ValidationError('Только ссылки на YouTube.')

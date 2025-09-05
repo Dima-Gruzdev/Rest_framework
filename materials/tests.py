@@ -9,6 +9,7 @@ User = get_user_model()
 
 
 class LessonTestCase(APITestCase):
+    """ Класс тестирования работоспособности уроков"""
     def setUp(self):
         self.user = User.objects.create_user(
             email='user@test.com',
