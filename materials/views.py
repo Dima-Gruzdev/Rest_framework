@@ -1,4 +1,4 @@
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.generics import (
     CreateAPIView,
     DestroyAPIView,
@@ -14,6 +14,7 @@ from rest_framework.viewsets import ModelViewSet
 from materials.models import Course, Lesson, Subscription
 from materials.paginations import CustomPagination
 from materials.serializers import CourseSerializer, LessonSerializer
+from materials.services import StripeService
 from users.permissions import  IsOwnerOrModeratorOrAdmin, CanDeleteCourseOrLesson
 
 
@@ -49,6 +50,22 @@ class CourseViewSet(ModelViewSet):
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        course = serializer.save(owner=request.user)
+
+        result = StripeService.create_product_and_price(course)
+
+        if not result["success"]:
+            course.delete()
+            return Response(
+                {"error": result["error"]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class LessonCreateApiView(CreateAPIView):
@@ -118,3 +135,21 @@ class SubscriptionAPIView(APIView):
             message = 'Подписка добавлена'
 
         return Response({"message": message})
+
+
+class CreateCheckoutSessionView(APIView):
+    """API для создания сессии оплаты"""
+
+    def post(self, request, *args, **kwargs):
+        course_id = request.data.get('course_id')
+        course = get_object_or_404(Course, id=course_id)
+
+        result = StripeService.create_checkout_session(course, request.user)
+
+        if result["success"]:
+            return Response({"url": result["url"]})
+        else:
+            return Response(
+                {"error": result["error"]},
+                status=status.HTTP_400_BAD_REQUEST
+            )

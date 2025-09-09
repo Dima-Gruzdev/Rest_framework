@@ -1,4 +1,6 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
+from rest_framework.filters import OrderingFilter
 from rest_framework.generics import CreateAPIView, UpdateAPIView, DestroyAPIView, ListAPIView, RetrieveAPIView
 
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
@@ -49,8 +51,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [
-        "django_filters.rest_framework.DjangoFilterBackend",
-        "rest_framework.filters.OrderingFilter",
+        DjangoFilterBackend,
+        OrderingFilter,
     ]
     filterset_class = PaymentFilter
     ordering_fields = ["payment_date", "amount"]

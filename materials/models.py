@@ -25,6 +25,9 @@ class Course(models.Model):
         related_name="courses",
         verbose_name="Владелец курса",
     )
+    stripe_product_id = models.CharField(max_length=100, blank=True, null=True)
+    stripe_price_id = models.CharField(max_length=100, blank=True, null=True)
+
 
     class Meta:
         verbose_name = "Курс"
