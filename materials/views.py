@@ -4,7 +4,8 @@ from rest_framework.generics import (
     DestroyAPIView,
     ListAPIView,
     RetrieveAPIView,
-    UpdateAPIView, get_object_or_404,
+    UpdateAPIView,
+    get_object_or_404,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -14,12 +15,11 @@ from rest_framework.viewsets import ModelViewSet
 from materials.models import Course, Lesson, Subscription
 from materials.paginations import CustomPagination
 from materials.serializers import CourseSerializer, LessonSerializer
-from materials.services import StripeService
-from users.permissions import  IsOwnerOrModeratorOrAdmin, CanDeleteCourseOrLesson
+from users.permissions import IsOwnerOrModeratorOrAdmin, CanDeleteCourseOrLesson
 
 
 class CourseViewSet(ModelViewSet):
-    """ Вьюшка  Курсов , наследующегося от Моделвиевсет (создание, удаление,
+    """Вьюшка  Курсов , наследующегося от Моделвиевсет (создание, удаление,
     редактирование и просмотра"""
 
     queryset = Course.objects.prefetch_related("lessons").all()
@@ -34,42 +34,30 @@ class CourseViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.groups.filter(name='moders').exists():
+        if user.groups.filter(name="moders").exists():
             return Course.objects.all()
         return Course.objects.filter(owner=user)
 
     def get_permissions(self):
-        if self.action == 'create':
+        if self.action == "create":
             permission_classes = [permissions.IsAdminUser]
-        elif self.action in ['update', 'partial_update', 'retrieve']:
-            permission_classes = [permissions.IsAuthenticated, IsOwnerOrModeratorOrAdmin]
-        elif self.action == 'destroy':
+        elif self.action in ["update", "partial_update", "retrieve"]:
+            permission_classes = [
+                permissions.IsAuthenticated,
+                IsOwnerOrModeratorOrAdmin,
+            ]
+        elif self.action == "destroy":
             permission_classes = [permissions.IsAuthenticated, CanDeleteCourseOrLesson]
-        elif self.action in ['list']:
+        elif self.action in ["list"]:
             permission_classes = [permissions.IsAuthenticated]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        course = serializer.save(owner=request.user)
-
-        result = StripeService.create_product_and_price(course)
-
-        if not result["success"]:
-            course.delete()
-            return Response(
-                {"error": result["error"]},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 class LessonCreateApiView(CreateAPIView):
-    """Создание уроков """
+    """Создание уроков"""
+
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAdminUser]
@@ -77,22 +65,25 @@ class LessonCreateApiView(CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+
 class LessonListApiView(ListAPIView):
     """Отображение уроков"""
+
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
 
-
     def get_queryset(self):
         user = self.request.user
-        if user.groups.filter(name='moders').exists():
+        if user.groups.filter(name="moders").exists():
             return Lesson.objects.all()
         return Lesson.objects.filter(owner=user)
 
+
 class LessonUpdateApiView(UpdateAPIView):
     """Редактирование уроков"""
+
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrModeratorOrAdmin]
@@ -100,6 +91,7 @@ class LessonUpdateApiView(UpdateAPIView):
 
 class LessonDestroyApiView(DestroyAPIView):
     """Удаление уроков"""
+
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAuthenticated, CanDeleteCourseOrLesson]
@@ -107,6 +99,7 @@ class LessonDestroyApiView(DestroyAPIView):
 
 class LessonRetrieveApiView(RetrieveAPIView):
     """Детальный просмотр"""
+
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrModeratorOrAdmin]
@@ -114,11 +107,12 @@ class LessonRetrieveApiView(RetrieveAPIView):
 
 class SubscriptionAPIView(APIView):
     """Подписка на курсы"""
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         user = request.user
-        course_id = request.data.get('course_id')
+        course_id = request.data.get("course_id")
 
         if not course_id:
             return Response({"error": "Не указан course_id"}, status=400)
@@ -129,27 +123,9 @@ class SubscriptionAPIView(APIView):
 
         if subscription.exists():
             subscription.delete()
-            message = 'Подписка удалена'
+            message = "Подписка удалена"
         else:
             Subscription.objects.create(user_sub=user, course_sub=course)
-            message = 'Подписка добавлена'
+            message = "Подписка добавлена"
 
         return Response({"message": message})
-
-
-class CreateCheckoutSessionView(APIView):
-    """API для создания сессии оплаты"""
-
-    def post(self, request, *args, **kwargs):
-        course_id = request.data.get('course_id')
-        course = get_object_or_404(Course, id=course_id)
-
-        result = StripeService.create_checkout_session(course, request.user)
-
-        if result["success"]:
-            return Response({"url": result["url"]})
-        else:
-            return Response(
-                {"error": result["error"]},
-                status=status.HTTP_400_BAD_REQUEST
-            )

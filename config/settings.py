@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     "materials",
     "django_filters",
     "rest_framework_simplejwt",
-    'drf_yasg',
+    "drf_yasg",
 ]
 
 
@@ -132,7 +132,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
-STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
-STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
-STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL')
-STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL')
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL")
+STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL")
