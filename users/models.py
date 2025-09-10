@@ -98,6 +98,11 @@ class Payments(models.Model):
         max_length=10, choices=PAYMENT_METHOD_CHOICES, verbose_name="Способ оплаты"
     )
 
+    stripe_session_id = models.CharField(max_length=200, blank=True, null=True)
+    payment_url = models.URLField(
+        blank=True, null=True, verbose_name="Ссылка на оплату"
+    )
+
     class Meta:
         verbose_name = "Платёж"
         verbose_name_plural = "Платежи"
