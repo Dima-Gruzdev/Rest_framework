@@ -1,4 +1,4 @@
-from rest_framework import permissions, status
+from rest_framework import permissions
 from rest_framework.generics import (
     CreateAPIView,
     DestroyAPIView,
@@ -16,6 +16,7 @@ from materials.models import Course, Lesson, Subscription
 from materials.paginations import CustomPagination
 from materials.serializers import CourseSerializer, LessonSerializer
 from users.permissions import IsOwnerOrModeratorOrAdmin, CanDeleteCourseOrLesson
+from materials.task import send_course_update_notification
 
 
 class CourseViewSet(ModelViewSet):
@@ -53,6 +54,10 @@ class CourseViewSet(ModelViewSet):
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
+
+    def perform_update(self, serializer):
+        course = serializer.save()
+        send_course_update_notification.delay(course.id)
 
 
 class LessonCreateApiView(CreateAPIView):

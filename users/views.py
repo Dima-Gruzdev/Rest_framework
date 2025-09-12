@@ -73,7 +73,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         payment = serializer.save(user=self.request.user)
 
-        pay_object = payment.course or payment.lesson
+        pay_object = payment.course if payment.course else payment.lesson
         if not pay_object:
             raise ValidationError("Укажите курс или урок")
 
@@ -101,6 +101,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
         if not session_result["success"]:
             raise ValidationError(session_result["error"])
 
-        payment.payment_link = session_result["url"]
+        payment.payment_url = session_result["url"]
         payment.stripe_session_id = session_result["session_id"]
         payment.save()
