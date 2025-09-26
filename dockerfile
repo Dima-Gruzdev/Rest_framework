@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 RUN pip install --no-cache-dir poetry
 
@@ -25,5 +25,3 @@ RUN poetry config virtualenvs.create false && \
 COPY . .
 
 EXPOSE 8000
-
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

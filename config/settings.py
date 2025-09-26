@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-
+from celery.schedules import crontab
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -137,6 +137,17 @@ STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL")
 STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL")
+
+
+CELERY_BEAT_SCHEDULE = {
+    'deactivate-inactive-users-daily': {
+        'task': 'users.tasks.deactivate_inactive_users',
+        'schedule': crontab(hour=2, minute=0),
+        'options': {
+            'queue': 'default'
+        }
+    },
+}
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
