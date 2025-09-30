@@ -44,7 +44,27 @@
    ```bash
    git@github.com:Dima-Gruzdev/Rest_framework.git
    cd PythonRestFramework
-## Автор
 
+## Запуск проекта с помощью Docker Compose
+
+Проект настроен на работу в контейнерах с использованием `docker-compose`.  
+Все необходимые сервисы: Django, PostgreSQL, Redis, Celery и Celery Beat — описаны в `docker-compose.yaml`.
+
+---
+
+### Шаги для запуска
+
+1. **Создайте `.env` из шаблона**
+   ```bash
+   cp .env.example .env
+   
+2. **Запустите сервисы**
+- 'docker-compose up --build'
+3. **Примените миграции**
+- docker-compose exec web python manage.py migrate
+4. **Создайте суперпользователя**
+- docker-compose exec web python manage.py createsuperuser
+
+## Автор
 - Груздев Дмитрий Александрович
 - email: nubile4446@mail.ru
