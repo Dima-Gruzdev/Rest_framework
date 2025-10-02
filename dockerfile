@@ -18,6 +18,8 @@ RUN apt-get update && \
         gcc \
     && rm -rf /var/lib/apt/lists/*
 
+RUN python manage.py collectstatic --noinput
+
 COPY pyproject.toml .
 RUN poetry config virtualenvs.create false && \
     poetry install --only main --no-root --no-dev --no-interaction --no-ansi
