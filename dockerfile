@@ -23,7 +23,7 @@ RUN apt-get update && \
 COPY pyproject.toml .
 
 RUN poetry config virtualenvs.create false && \
-    poetry install --only main --no-root --without dev --no-interaction --no-ansi
+    poetry install --only main --no-root --no-interaction --no-ansi
 
 
 COPY . .
