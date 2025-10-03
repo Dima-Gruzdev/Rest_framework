@@ -30,7 +30,7 @@ jobs:
 
       - name: Install flake8
         run: |
-          poetry add --group dev flake8 --optional
+          poetry add --group dev flake8
           poetry run pip install flake8
 
       - name: Run flake8
