@@ -64,9 +64,11 @@ jobs:
           poetry install --no-interaction --no-root --only=main
 
       - name: Run tests
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
-          poetry run python manage.py migrate --settings=config.settings
-          poetry run python manage.py test
+            poetry run python manage.py migrate
+            poetry run python manage.py test
 
   build:
     needs: test
