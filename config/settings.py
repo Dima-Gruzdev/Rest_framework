@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -9,13 +10,11 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY", 'django-insecure-fallback-key')
 
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -33,7 +32,6 @@ INSTALLED_APPS = [
     'django_celery_beat',
 ]
 
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -44,9 +42,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-
 ROOT_URLCONF = "config.urls"
-
 
 TEMPLATES = [
     {
@@ -63,21 +59,28 @@ TEMPLATES = [
     },
 ]
 
-
 WSGI_APPLICATION = "config.wsgi.application"
 
+RUNNING_TESTS = 'test' in sys.argv or 'pytest' in sys.modules or os.getenv('CI')
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
+if RUNNING_TESTS:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',  # или BASE_DIR / 'test_db.sqlite3'
+        }
     }
-}
-
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv("DB_PORT"),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -94,7 +97,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"
@@ -103,9 +105,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_ROOT = "static"
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATIC_URL = "static/"
-STATICFILES_DIRS = (BASE_DIR / "staticfiles",)
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -137,7 +138,6 @@ STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL")
 STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL")
-
 
 CELERY_BEAT_SCHEDULE = {
     'deactivate-inactive-users-daily': {
